@@ -84,6 +84,61 @@ def get_egg_log(log_id):
         return jsonify({"error": "Egg log not found"}), 404
     return jsonify(log.to_dict()), 200
 
+# ---- FeedingLog CRUD ----
+@app.route("/feeding_logs", methods=["POST"])
+def create_feeding_log():
+    data = request.get_json()
+    try:
+        chicken_id = data.get("chicken_id")
+        feed_type = data.get("feed_type")
+        quantity = data.get("quantity", 0)
+
+        if not chicken_id or not feed_type:
+            return jsonify({"error": "chicken_id and feed_type are required"}), 400
+
+        # Check if chicken exists
+        chicken = Chicken.query.get(chicken_id)
+        if not chicken:
+            return jsonify({"error": "Chicken not found"}), 404
+
+        feeding_log = FeedingLog(chicken_id=chicken_id, feed_type=feed_type, quantity=quantity)
+        db.session.add(feeding_log)
+        db.session.commit()
+        return jsonify(feeding_log.to_dict()), 201
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/feeding_logs", methods=["GET"])
+def list_feeding_logs():
+    logs = FeedingLog.query.all()
+    return jsonify([log.to_dict() for log in logs]), 200
+
+
+@app.route("/feeding_logs/<int:log_id>", methods=["GET"])
+def get_feeding_log(log_id):
+    log = FeedingLog.query.get(log_id)
+    if not log:
+        return jsonify({"error": "Feeding log not found"}), 404
+    return jsonify(log.to_dict()), 200
+
+
+@app.route("/feeding_logs/<int:log_id>", methods=["DELETE"])
+def delete_feeding_log(log_id):
+    log = FeedingLog.query.get(log_id)
+    if not log:
+        return jsonify({"error": "Feeding log not found"}), 404
+    try:
+        db.session.delete(log)
+        db.session.commit()
+        return jsonify({"message": "Feeding log deleted"}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
