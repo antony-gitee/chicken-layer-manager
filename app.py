@@ -38,5 +38,12 @@ def list_chickens():
     chickens = Chicken.query.all()
     return jsonify([c.to_dict() for c in chickens]), 200
 
+@app.route("/chickens/<int:id>", methods=["GET"])
+def get_chicken(id):
+    chicken = Chicken.query.get(id)
+    if not chicken:
+        return jsonify({"error": "Chicken not found"}), 404
+    return jsonify(chicken.to_dict()), 200
+
 if __name__ == "__main__":
     app.run(debug=True)
