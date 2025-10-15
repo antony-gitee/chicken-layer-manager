@@ -18,22 +18,22 @@ class Chicken(db.Model):
             "name": self.name,
             "breed": self.breed,
             "age": self.age,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
         }
 
 class EggLog(db.Model):
     __tablename__ = "egg_logs"
     id = db.Column(db.Integer, primary_key=True)
     chicken_id = db.Column(db.Integer, db.ForeignKey('chickens.id'), nullable=False)
-    count = db.Column(db.Integer, nullable=False)
-    date_collected = db.Column(db.Date, default=datetime.utcnow)
+    number_of_eggs = db.Column(db.Integer, nullable=False)
+    date_collected = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
         return {
             "id": self.id,
             "chicken_id": self.chicken_id,
-            "count": self.count,
-            "date_collected": self.date_collected.isoformat() if self.date_collected else None,
+            "number_of_eggs": self.number_of_eggs,
+            "date_collected": self.date_collected.strftime("%Y-%m-%d %H:%M:%S") if self.date_collected else None,
         }
 
 class FeedingLog(db.Model):
@@ -50,5 +50,5 @@ class FeedingLog(db.Model):
             "chicken_id": self.chicken_id,
             "feed_type": self.feed_type,
             "quantity": self.quantity,
-            "date": self.date.isoformat() if self.date else None,
+            "date": self.date.strftime("%Y-%m-%d %H:%M:%S") if self.date else None,
         }
