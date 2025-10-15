@@ -1,8 +1,5 @@
-# models.py
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
-
-db = SQLAlchemy()
+from datetime import datetime
+from extensions import db
 
 class Chicken(db.Model):
     __tablename__ = "chickens"
@@ -10,9 +7,10 @@ class Chicken(db.Model):
     name = db.Column(db.String(100), nullable=False)
     breed = db.Column(db.String(100))
     age = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     egg_logs = db.relationship("EggLog", backref="chicken", cascade="all, delete-orphan")
+    feeding_logs = db.relationship("FeedingLog", backref="chicken", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -26,35 +24,31 @@ class Chicken(db.Model):
 class EggLog(db.Model):
     __tablename__ = "egg_logs"
     id = db.Column(db.Integer, primary_key=True)
-    chicken_id = db.Column(db.Integer, db.ForeignKey("chickens.id"), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    count = db.Column(db.Integer, nullable=False, default=0)
-    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    chicken_id = db.Column(db.Integer, db.ForeignKey('chickens.id'), nullable=False)
+    count = db.Column(db.Integer, nullable=False)
+    date_collected = db.Column(db.Date, default=datetime.utcnow)
 
     def to_dict(self):
         return {
             "id": self.id,
             "chicken_id": self.chicken_id,
-            "date": self.date.isoformat() if self.date else None,
             "count": self.count,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "date_collected": self.date_collected.isoformat() if self.date_collected else None,
         }
 
 class FeedingLog(db.Model):
     __tablename__ = "feeding_logs"
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, nullable=False)
-    time = db.Column(db.Time)
+    chicken_id = db.Column(db.Integer, db.ForeignKey('chickens.id'), nullable=False)
     feed_type = db.Column(db.String(100))
-    water = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    quantity = db.Column(db.Float)
+    date = db.Column(db.Date, default=datetime.utcnow)
 
     def to_dict(self):
         return {
             "id": self.id,
-            "date": self.date.isoformat() if self.date else None,
-            "time": self.time.isoformat() if self.time else None,
+            "chicken_id": self.chicken_id,
             "feed_type": self.feed_type,
-            "water": self.water,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "quantity": self.quantity,
+            "date": self.date.isoformat() if self.date else None,
         }
