@@ -138,6 +138,7 @@ def delete_feeding_log(log_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+from app import app
 
 
 if __name__ == "__main__":
