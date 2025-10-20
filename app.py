@@ -4,12 +4,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from config import Config
 from extensions import db
 from models import Chicken, EggLog, FeedingLog
-
+import os
 app = Flask(__name__)
 CORS(app)
 
 # Load config and initialize db
 app.config.from_object(Config)
+
+if os.getenv("MYSQL_ADDON_URI"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("MYSQL_ADDON_URI").replace("mysql://", "mysql+pymysql://")
+
 db.init_app(app)
 
 # Create tables
